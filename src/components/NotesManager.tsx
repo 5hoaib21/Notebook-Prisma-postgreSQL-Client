@@ -1,7 +1,36 @@
+"use client";
+
+import { useEffect, useActionState } from "react";
 import Link from "next/link";
+import toast from "react-hot-toast";
 import { Pin, Trash2 } from "lucide-react";
 import type { AdminNote } from "@/types";
-import { deleteNoteAction } from "@/lib/actions/admin";
+import { deleteNoteAction, type AdminActionState } from "@/lib/actions/admin";
+
+const DeleteNoteButton = ({ id }: { id: string }) => {
+  const [state, formAction, pending] = useActionState<AdminActionState, FormData>(
+    deleteNoteAction.bind(null, id),
+    {}
+  );
+
+  useEffect(() => {
+    if (state.success) toast.success(state.success);
+    if (state.error) toast.error(state.error);
+  }, [state]);
+
+  return (
+    <form action={formAction}>
+      <button
+        type="submit"
+        disabled={pending}
+        aria-label="Delete note"
+        className="rounded-md border border-red-200 px-2 py-1 text-xs text-red-600 hover:bg-red-50 disabled:opacity-60"
+      >
+        Delete
+      </button>
+    </form>
+  );
+};
 
 const NotesManager = ({
   notes,
@@ -56,7 +85,8 @@ const NotesManager = ({
               <tr key={note.id}>
                 <td className="max-w-[16rem] truncate px-4 py-2 font-medium">{note.title}</td>
                 <td className="px-4 py-2 text-stone-500">
-                  {note.user.name} <span className="text-stone-400">&lt;{note.user.email}&gt;</span>
+                  {note.user.name}{" "}
+                  <span className="text-stone-400">&lt;{note.user.email}&gt;</span>
                 </td>
                 <td className="px-4 py-2 text-stone-500">{note.category?.name ?? "—"}</td>
                 <td className="px-4 py-2 text-center">
@@ -74,15 +104,7 @@ const NotesManager = ({
                     >
                       View
                     </Link>
-                    <form action={deleteNoteAction.bind(null, note.id)}>
-                      <button
-                        type="submit"
-                        aria-label={`Delete ${note.title}`}
-                        className="rounded-md border border-red-200 px-2 py-1 text-xs text-red-600 hover:bg-red-50"
-                      >
-                        Delete
-                      </button>
-                    </form>
+                    <DeleteNoteButton id={note.id} />
                   </div>
                 </td>
               </tr>

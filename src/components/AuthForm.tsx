@@ -1,26 +1,38 @@
 "use client";
 
-import { useActionState } from "react";
+import { useEffect, useActionState } from "react";
+import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 import {
   loginAction,
   signupAction,
   type AuthActionState,
 } from "@/lib/actions/auth";
 
-export const googleAuthUrl =
-  (process.env.NEXT_PUBLIC_BASE_URL as string) || "http://localhost:8080";
-
 const AuthForm = ({ mode }: { mode: "login" | "signup" }) => {
+  const router = useRouter();
   const [state, formAction, pending] = useActionState<
     AuthActionState,
     FormData
   >(mode === "login" ? loginAction : signupAction, {});
 
+  useEffect(() => {
+    if (state.success) {
+      toast.success(state.success);
+      router.push("/notes");
+    }
+    if (state.error) toast.error(state.error);
+  }, [state, router]);
+
   return (
     <div className="flex flex-col gap-4">
-      <a
-        href={`${googleAuthUrl}/api/auth/google`}
-        className="flex items-center justify-center gap-2 rounded-md border border-stone-300 px-4 py-2 text-sm font-medium hover:bg-stone-100"
+      <button
+        type="button"
+        disabled
+        aria-disabled="true"
+        tabIndex={-1}
+        title="Google sign-in is currently unavailable"
+        className="flex items-center justify-center gap-2 cursor-not-allowed rounded-md border border-stone-300 bg-stone-100 px-4 py-2 text-sm font-medium text-stone-400 opacity-60"
       >
         <svg className="h-4 w-4" viewBox="0 0 24 24" aria-hidden="true">
           <path
@@ -41,7 +53,7 @@ const AuthForm = ({ mode }: { mode: "login" | "signup" }) => {
           />
         </svg>
         Continue with Google
-      </a>
+      </button>
 
       <div className="flex items-center gap-3 text-xs text-stone-400">
         <span className="h-px flex-1 bg-stone-200" />
@@ -90,9 +102,7 @@ const AuthForm = ({ mode }: { mode: "login" | "signup" }) => {
             type="password"
             required
             minLength={6}
-            autoComplete={
-              mode === "login" ? "current-password" : "new-password"
-            }
+            autoComplete={mode === "login" ? "current-password" : "new-password"}
             className="w-full rounded-md border border-stone-300 px-3 py-2 outline-none focus:border-teal-600"
           />
         </div>

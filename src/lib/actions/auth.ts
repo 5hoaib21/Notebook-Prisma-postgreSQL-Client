@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { baseURL, establishSession } from "../auth";
 
 export interface AuthActionState {
+  success?: string;
   error?: string;
 }
 
@@ -27,7 +28,7 @@ export async function loginAction(
   }
 
   await establishSession(body.data.token);
-  redirect("/notes");
+  return { success: "Logged in successfully" };
 }
 
 export async function signupAction(
@@ -51,7 +52,7 @@ export async function signupAction(
   }
 
   await establishSession(body.data.token);
-  redirect("/notes");
+  return { success: "Account created. Welcome!" };
 }
 
 export async function logoutAction(): Promise<void> {

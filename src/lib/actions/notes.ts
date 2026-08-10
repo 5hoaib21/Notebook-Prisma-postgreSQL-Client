@@ -6,15 +6,18 @@ import { notesApi } from "../api";
 import { getToken } from "../auth";
 
 export interface NoteActionState {
+  success?: string;
   error?: string;
 }
+
+const TOKEN_MESSAGE = "You must be logged in to do that";
 
 export async function createNoteAction(
   _prev: NoteActionState,
   formData: FormData
 ): Promise<NoteActionState> {
   const token = await getToken();
-  if (!token) redirect("/login");
+  if (!token) return { error: TOKEN_MESSAGE };
 
   const title = String(formData.get("title") ?? "").trim();
   const content = String(formData.get("content") ?? "").trim();
@@ -30,7 +33,7 @@ export async function createNoteAction(
   }
 
   revalidatePath("/notes");
-  redirect("/notes");
+  return { success: "Note created" };
 }
 
 export async function updateNoteAction(
@@ -38,7 +41,7 @@ export async function updateNoteAction(
   formData: FormData
 ): Promise<NoteActionState> {
   const token = await getToken();
-  if (!token) redirect("/login");
+  if (!token) return { error: TOKEN_MESSAGE };
 
   const id = String(formData.get("id") ?? "");
   const title = String(formData.get("title") ?? "").trim();
@@ -56,25 +59,38 @@ export async function updateNoteAction(
 
   revalidatePath("/notes");
   revalidatePath(`/notes/${id}`);
-  redirect("/notes");
+  return { success: "Note updated" };
 }
 
-export async function deleteNoteAction(id: string): Promise<void> {
+export async function deleteNoteAction(
+  id: string,
+  _prev: NoteActionState,
+  _formData?: FormData
+): Promise<NoteActionState> {
   const token = await getToken();
-  if (!token) redirect("/login");
+  if (!token) return { error: TOKEN_MESSAGE };
   try {
     await notesApi.remove(id);
-  } finally {
-    revalidatePath("/notes");
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : "Failed to delete note" };
   }
+  revalidatePath("/notes");
+  return { success: "Note deleted" };
 }
 
-export async function togglePinAction(id: string): Promise<void> {
+export async function togglePinAction(
+  id: string,
+  _prev: NoteActionState,
+  _formData?: FormData
+): Promise<NoteActionState> {
   const token = await getToken();
-  if (!token) redirect("/login");
+  if (!token) return { error: TOKEN_MESSAGE };
   try {
     await notesApi.togglePin(id);
-  } finally {
-    revalidatePath("/notes");
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : "Failed to update pin status" };
   }
+  revalidatePath("/notes");
+  revalidatePath(`/notes/${id}`);
+  return { success: "Pinned status updated" };
 }

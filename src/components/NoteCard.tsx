@@ -1,20 +1,32 @@
+"use client";
+
+import { useEffect, useActionState } from "react";
 import Link from "next/link";
+import toast from "react-hot-toast";
 import { Pin } from "lucide-react";
 import type { Note } from "@/types";
 import { togglePinAction } from "@/lib/actions/notes";
 import NoteActions from "./NoteActions";
 
 const NoteCard = ({ note }: { note: Note }) => {
+  const [pinState, pinFormAction, pinPending] = useActionState(
+    togglePinAction.bind(null, note.id),
+    {}
+  );
+
+  useEffect(() => {
+    if (pinState.success) toast.success(pinState.success);
+    if (pinState.error) toast.error(pinState.error);
+  }, [pinState]);
+
   return (
     <div className="flex flex-col gap-3 rounded-xl border border-stone-200 bg-white p-4 shadow-sm transition hover:shadow-md">
-      <form
-        action={togglePinAction.bind(null, note.id)}
-        className="flex w-full items-start justify-between gap-2"
-      >
+      <form action={pinFormAction} className="flex w-full items-start justify-between gap-2">
         <button
           aria-label={note.isPinned ? "Unpin note" : "Pin note"}
           type="submit"
-          className={`rounded-md p-1 transition ${
+          disabled={pinPending}
+          className={`rounded-md p-1 transition disabled:opacity-60 ${
             note.isPinned
               ? "text-teal-700 hover:bg-teal-50"
               : "text-stone-300 hover:bg-stone-100 hover:text-stone-500"

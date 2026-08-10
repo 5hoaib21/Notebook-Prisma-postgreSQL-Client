@@ -6,6 +6,7 @@ import { categoriesApi } from "../api";
 import { getSession } from "../auth";
 
 export interface CategoryActionState {
+  success?: string;
   error?: string;
 }
 
@@ -18,7 +19,11 @@ export async function createCategoryAction(
   _prev: CategoryActionState,
   formData: FormData
 ): Promise<CategoryActionState> {
-  await ensureUser();
+  try {
+    await ensureUser();
+  } catch {
+    return { error: "You must be logged in to do that" };
+  }
   const name = String(formData.get("name") ?? "").trim();
   if (!name) return { error: "Name is required" };
   try {
@@ -27,14 +32,24 @@ export async function createCategoryAction(
     return { error: e instanceof Error ? e.message : "Failed to create category" };
   }
   revalidatePath("/notes");
-  return {};
+  return { success: `Label "${name}" created` };
 }
 
-export async function deleteCategoryAction(id: string): Promise<void> {
-  await ensureUser();
+export async function deleteCategoryAction(
+  id: string,
+  _prev: CategoryActionState,
+  _formData?: FormData
+): Promise<CategoryActionState> {
+  try {
+    await ensureUser();
+  } catch {
+    return { error: "You must be logged in to do that" };
+  }
   try {
     await categoriesApi.remove(id);
-  } finally {
-    revalidatePath("/notes");
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : "Failed to delete category" };
   }
+  revalidatePath("/notes");
+  return { success: "Label deleted" };
 }

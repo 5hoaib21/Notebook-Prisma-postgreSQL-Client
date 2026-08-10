@@ -1,12 +1,24 @@
 "use client";
 
-import { useActionState } from "react";
+import { useEffect, useActionState } from "react";
+import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 import type { Category, Note } from "@/types";
 import { createNoteAction, updateNoteAction, type NoteActionState } from "@/lib/actions/notes";
 
 const NoteForm = ({ categories, note }: { categories: Category[]; note?: Note }) => {
+  const router = useRouter();
   const action = note ? updateNoteAction : createNoteAction;
   const [state, formAction, pending] = useActionState<NoteActionState, FormData>(action, {});
+
+  useEffect(() => {
+    if (state.success) {
+      toast.success(state.success);
+      router.push("/notes");
+      router.refresh();
+    }
+    if (state.error) toast.error(state.error);
+  }, [state, router]);
 
   return (
     <form

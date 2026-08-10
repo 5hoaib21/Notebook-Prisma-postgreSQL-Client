@@ -1,7 +1,8 @@
 "use client";
 
-import { useActionState } from "react";
+import { useEffect, useActionState } from "react";
 import { Trash2 } from "lucide-react";
+import toast from "react-hot-toast";
 import type { Category } from "@/types";
 import {
   createCategoryAction,
@@ -9,11 +10,41 @@ import {
   type CategoryActionState,
 } from "@/lib/actions/categories";
 
+const DeleteLabelButton = ({ id }: { id: string }) => {
+  const [state, formAction, pending] = useActionState<CategoryActionState, FormData>(
+    deleteCategoryAction.bind(null, id),
+    {}
+  );
+
+  useEffect(() => {
+    if (state.success) toast.success(state.success);
+    if (state.error) toast.error(state.error);
+  }, [state]);
+
+  return (
+    <form action={formAction}>
+      <button
+        type="submit"
+        disabled={pending}
+        aria-label="Delete label"
+        className="rounded-md p-1.5 text-stone-400 hover:bg-red-50 hover:text-red-600 disabled:opacity-60"
+      >
+        <Trash2 className="h-4 w-4" />
+      </button>
+    </form>
+  );
+};
+
 const LabelsManager = ({ categories }: { categories: Category[] }) => {
   const [state, formAction, pending] = useActionState<CategoryActionState, FormData>(
     createCategoryAction,
     {}
   );
+
+  useEffect(() => {
+    if (state.success) toast.success(state.success);
+    if (state.error) toast.error(state.error);
+  }, [state]);
 
   return (
     <div className="rounded-xl border border-stone-200 bg-white shadow-sm">
@@ -24,23 +55,12 @@ const LabelsManager = ({ categories }: { categories: Category[] }) => {
 
       <ul className="max-h-56 divide-y divide-stone-100 overflow-y-auto">
         {categories.map((c) => (
-          <li
-            key={c.id}
-            className="flex items-center justify-between px-4 py-2 text-sm"
-          >
+          <li key={c.id} className="flex items-center justify-between px-4 py-2 text-sm">
             <span>
               {c.name}
               <span className="ml-2 text-stone-400">{c._count.notes} notes</span>
             </span>
-            <form action={deleteCategoryAction.bind(null, c.id)}>
-              <button
-                type="submit"
-                aria-label={`Delete ${c.name}`}
-                className="rounded-md p-1.5 text-stone-400 hover:bg-red-50 hover:text-red-600"
-              >
-                <Trash2 className="h-4 w-4" />
-              </button>
-            </form>
+            <DeleteLabelButton id={c.id} />
           </li>
         ))}
       </ul>
