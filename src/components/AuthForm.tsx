@@ -1,16 +1,20 @@
 "use client";
 
 import { useActionState } from "react";
-import { loginAction, signupAction, type AuthActionState } from "@/lib/actions/auth";
+import {
+  loginAction,
+  signupAction,
+  type AuthActionState,
+} from "@/lib/actions/auth";
 
 export const googleAuthUrl =
   (process.env.NEXT_PUBLIC_BASE_URL as string) || "http://localhost:8080";
 
 const AuthForm = ({ mode }: { mode: "login" | "signup" }) => {
-  const [state, formAction, pending] = useActionState<AuthActionState, FormData>(
-    mode === "login" ? loginAction : signupAction,
-    {}
-  );
+  const [state, formAction, pending] = useActionState<
+    AuthActionState,
+    FormData
+  >(mode === "login" ? loginAction : signupAction, {});
 
   return (
     <div className="flex flex-col gap-4">
@@ -86,13 +90,17 @@ const AuthForm = ({ mode }: { mode: "login" | "signup" }) => {
             type="password"
             required
             minLength={6}
-            autoComplete={mode === "login" ? "current-password" : "new-password"}
+            autoComplete={
+              mode === "login" ? "current-password" : "new-password"
+            }
             className="w-full rounded-md border border-stone-300 px-3 py-2 outline-none focus:border-teal-600"
           />
         </div>
 
         {state.error && (
-          <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{state.error}</p>
+          <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
+            {state.error}
+          </p>
         )}
 
         <button
@@ -100,7 +108,11 @@ const AuthForm = ({ mode }: { mode: "login" | "signup" }) => {
           disabled={pending}
           className="rounded-md bg-teal-700 px-4 py-2 text-white hover:bg-teal-800 disabled:opacity-60"
         >
-          {pending ? "Please wait…" : mode === "login" ? "Login" : "Create account"}
+          {pending
+            ? "Please wait…"
+            : mode === "login"
+              ? "Login"
+              : "Create account"}
         </button>
       </form>
     </div>
