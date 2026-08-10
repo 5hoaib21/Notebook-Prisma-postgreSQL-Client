@@ -9,7 +9,10 @@ const Navbar = async () => {
   return (
     <header className="sticky top-0 z-10 border-b border-stone-200 bg-white/90 backdrop-blur">
       <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4">
-        <Link href={user ? "/notes" : "/"} className="flex items-center gap-2 font-semibold">
+        <Link
+          href={user ? "/notes" : "/"}
+          className="flex items-center gap-2 font-semibold"
+        >
           <NotebookPen className="h-5 w-5 text-teal-700" />
           <span>Notebook</span>
         </Link>
@@ -22,7 +25,7 @@ const Navbar = async () => {
               </span>
               {user.role === "ADMIN" && (
                 <Link href="/admin" className="text-teal-700 hover:underline">
-                  Admin
+                  Dashboard
                 </Link>
               )}
               <form action={logoutAction}>
