@@ -6,6 +6,7 @@ and Tailwind CSS v4. It talks to the Express + Prisma + PostgreSQL backend in `.
 ## Features
 
 - Register / login (backend JWT stored in an httpOnly cookie via server actions)
+- Google OAuth social login (Continue with Google → `/auth/callback` sets the session cookie)
 - Create, edit, view, pin, and soft-delete notes
 - Per-user labels (Google Keep–style): default labels plus create/delete your own; filter
   by label, search, sort, and pinned
